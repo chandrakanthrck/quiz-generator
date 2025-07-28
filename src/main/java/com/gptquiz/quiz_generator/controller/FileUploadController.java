@@ -1,6 +1,7 @@
 package com.gptquiz.quiz_generator.controller;
 
 import com.gptquiz.quiz_generator.service.FileProcessingService;
+import com.gptquiz.quiz_generator.service.OpenAiService;
 import org.apache.tika.exception.TikaException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,4 +26,19 @@ public class FileUploadController {
             return ResponseEntity.status(500).body("Error processing file: " + e.getMessage());
         }
     }
+
+    @Autowired
+    private OpenAiService openAiService;
+
+    @PostMapping("/flashcards")
+    public ResponseEntity<?> uploadAndGenerateFlashcards(@RequestParam("file") MultipartFile file) {
+        try {
+            String text = fileProcessingService.extractTextFromFile(file);
+            String flashcards = openAiService.generateFlashcards(text);
+            return ResponseEntity.ok(flashcards);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
+
 }
